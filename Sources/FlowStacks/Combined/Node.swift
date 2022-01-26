@@ -80,19 +80,17 @@ indirect enum Node<Screen, V: View>: View {
     }
   }
   
+  @ViewBuilder
   private var unwrappedBody: some View {
+    let asSheet = next?.route?.style.isSheet ?? false
     screenView
       .background(
         NavigationLink(destination: next, isActive: pushBinding, label: EmptyView.init)
           .hidden()
       )
-      .sheet(
-        isPresented: sheetBinding,
-        onDismiss: nil,
-        content: { next }
-      )
-      .cover(
-        isPresented: coverBinding,
+      .present(
+        asSheet: asSheet,
+        isPresented: asSheet ? sheetBinding : coverBinding,
         onDismiss: nil,
         content: { next }
       )
@@ -113,9 +111,9 @@ indirect enum Node<Screen, V: View>: View {
 /// There are spurious state updates when using the `column` navigation view style, so
 /// the navigation view style is forced to `stack` where possible.
 private var supportedNavigationViewStyle: some NavigationViewStyle {
-#if os(macOS)
+  #if os(macOS)
     .automatic
-#else
+  #else
     .stack
-#endif
+  #endif
 }
